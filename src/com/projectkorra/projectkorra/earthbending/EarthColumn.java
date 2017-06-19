@@ -1,0 +1,213 @@
+/*
+ * Decompiled with CFR 0_118.
+ * 
+ * Could not load the following classes:
+ *  org.bukkit.Location
+ *  org.bukkit.Material
+ *  org.bukkit.World
+ *  org.bukkit.block.Block
+ *  org.bukkit.configuration.file.FileConfiguration
+ *  org.bukkit.entity.Player
+ *  org.bukkit.util.Vector
+ */
+package com.projectkorra.projectkorra.earthbending;
+
+import com.projectkorra.projectkorra.ability.AvatarState;
+import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.GeneralMethods;
+import com.projectkorra.projectkorra.ProjectKorra;
+import com.projectkorra.projectkorra.earthbending.CompactColumn;
+import com.projectkorra.projectkorra.earthbending.EarthMethods;
+import com.projectkorra.projectkorra.util.BlockSource;
+import com.projectkorra.projectkorra.util.ClickType;
+
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
+
+public class EarthColumn {
+    public static ConcurrentHashMap<Integer, EarthColumn> instances = new ConcurrentHashMap();
+    public static final int standardheight = ProjectKorra.plugin.getConfig().getInt("Abilities.Earth.RaiseEarth.Column.Height");
+    private static int ID = Integer.MIN_VALUE;
+    private static double range = 20.0;
+    private static double speed = 8.0;
+    private static final Vector direction = new Vector(0, 1, 0);
+    private static long interval = (long)(1000.0 / speed);
+    private Location origin;
+    private Location location;
+    private Block block;
+    private int distance;
+    private Player player;
+    private int id;
+    private long time;
+    private int height = standardheight;
+    private ConcurrentHashMap<Block, Block> affectedblocks = new ConcurrentHashMap();
+
+    public EarthColumn(Player player) {
+        BendingPlayer bPlayer = GeneralMethods.getBendingPlayer(player.getName());
+        if (bPlayer.isOnCooldown("RaiseEarth")) {
+            return;
+        }
+        try {
+            if (AvatarState.isAvatarState(player)) {
+                this.height = (int)(0.4 * (double)AvatarState.getValue(this.height));
+            }
+            this.block = BlockSource.getEarthSourceBlock(player, range, ClickType.LEFT_CLICK);
+            if (this.block == null) {
+                return;
+            }
+            this.origin = this.block.getLocation();
+            this.location = this.origin.clone();
+            this.distance = EarthMethods.getEarthbendableBlocksLength(player, this.block, direction.clone().multiply(-1), this.height);
+        }
+        catch (IllegalStateException e) {
+            return;
+        }
+        this.player = player;
+        this.loadAffectedBlocks();
+        if (this.distance != 0 && this.canInstantiate()) {
+            this.id = ID;
+            instances.put(this.id, this);
+            bPlayer.addCooldown("RaiseEarth", GeneralMethods.getGlobalCooldown());
+            if (ID >= Integer.MAX_VALUE) {
+                ID = Integer.MIN_VALUE;
+            }
+            ++ID;
+            this.time = System.currentTimeMillis() - interval;
+        }
+    }
+
+    public EarthColumn(Player player, Location origin) {
+        this.origin = origin;
+        this.location = origin.clone();
+        this.block = this.location.getBlock();
+        this.player = player;
+        this.distance = EarthMethods.getEarthbendableBlocksLength(player, this.block, direction.clone().multiply(-1), this.height);
+        this.loadAffectedBlocks();
+        if (this.distance != 0 && this.canInstantiate()) {
+            this.id = ID;
+            instances.put(this.id, this);
+            if (ID >= Integer.MAX_VALUE) {
+                ID = Integer.MIN_VALUE;
+            }
+            ++ID;
+            this.time = System.currentTimeMillis() - interval;
+        }
+    }
+
+    public EarthColumn(Player player, Location origin, int height) {
+        this.height = height;
+        this.origin = origin;
+        this.location = origin.clone();
+        this.block = this.location.getBlock();
+        this.player = player;
+        this.distance = EarthMethods.getEarthbendableBlocksLength(player, this.block, direction.clone().multiply(-1), height);
+        this.loadAffectedBlocks();
+        if (this.distance != 0 && this.canInstantiate()) {
+            this.id = ID;
+            instances.put(this.id, this);
+            if (ID >= Integer.MAX_VALUE) {
+                ID = Integer.MIN_VALUE;
+            }
+            ++ID;
+            this.time = System.currentTimeMillis() - interval;
+        }
+    }
+
+    private void loadAffectedBlocks() {
+        this.affectedblocks.clear();
+        int i = 0;
+        while (i <= this.distance) {
+            Block thisblock = this.block.getWorld().getBlockAt(this.location.clone().add(direction.clone().multiply(- i)));
+            this.affectedblocks.put(thisblock, thisblock);
+            if (CompactColumn.blockInAllAffectedBlocks(thisblock)) {
+                CompactColumn.revertBlock(thisblock);
+            }
+            ++i;
+        }
+    }
+
+    private boolean blockInAffectedBlocks(Block block) {
+        if (this.affectedblocks.containsKey((Object)block)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean blockInAllAffectedBlocks(Block block) {
+        Iterator iterator = instances.keySet().iterator();
+        while (iterator.hasNext()) {
+            int ID = (Integer)iterator.next();
+            if (!instances.get(ID).blockInAffectedBlocks(block)) continue;
+            return true;
+        }
+        return false;
+    }
+
+    public static void revertBlock(Block block) {
+        Iterator iterator = instances.keySet().iterator();
+        while (iterator.hasNext()) {
+            int ID = (Integer)iterator.next();
+            if (!instances.get(ID).blockInAffectedBlocks(block)) continue;
+            EarthColumn.instances.get((Object)Integer.valueOf((int)ID)).affectedblocks.remove((Object)block);
+        }
+    }
+
+    private boolean canInstantiate() {
+        for (Block block : this.affectedblocks.keySet()) {
+            if (!EarthColumn.blockInAllAffectedBlocks(block) && block.getType() != Material.AIR) continue;
+            return false;
+        }
+        return true;
+    }
+
+    public static void progressAll() {
+        Iterator iterator = instances.keySet().iterator();
+        while (iterator.hasNext()) {
+            int ID = (Integer)iterator.next();
+            instances.get(ID).progress();
+        }
+    }
+
+    private boolean progress() {
+        if (System.currentTimeMillis() - this.time >= interval) {
+            this.time = System.currentTimeMillis();
+            if (!this.moveEarth()) {
+                instances.remove(this.id);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean moveEarth() {
+        Block block = this.location.getBlock();
+        this.location = this.location.add(direction);
+        EarthMethods.moveEarth(this.player, block, direction, this.distance);
+        this.loadAffectedBlocks();
+        if (this.location.distance(this.origin) >= (double)this.distance) {
+            return false;
+        }
+        return true;
+    }
+
+    public static void removeAll() {
+        Iterator iterator = instances.keySet().iterator();
+        while (iterator.hasNext()) {
+            int id = (Integer)iterator.next();
+            instances.remove(id);
+        }
+    }
+
+    public static String getDescription() {
+        return "To use, simply left-click on an earthbendable block. A column of earth will shoot upwards from that location. Anything in the way of the column will be brought up with it, leaving talented benders the ability to trap brainless entities up there. Additionally, simply sneak (default shift) looking at an earthbendable block. A wall of earth will shoot upwards from that location. Anything in the way of the wall will be brought up with it. ";
+    }
+}
+

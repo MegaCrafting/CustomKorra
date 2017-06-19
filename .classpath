@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/EffectLib.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/Factions.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/LWC.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/MassiveCore.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/ProtocolLib.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/Questioner.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/spigot-1.12-3.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/Towny.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/TownyChat.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/TownyNameUpdater.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/Vault(2).jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/worldedit-bukkit-6.1.5.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/worldguard-6.2.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/dTools.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/GriefPrevention.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/PreciousStones-10.5.3.jar"/>
+	<classpathentry kind="lib" path="H:/Private work/Minecraft/Minecraft Plugins/MegaBending Plugins/NoCheatPlus-7.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
